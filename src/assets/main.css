@@ -1,0 +1,4 @@
+/* This is the /src/assets/main.css file. */
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/forms";
