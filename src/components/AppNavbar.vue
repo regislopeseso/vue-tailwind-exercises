@@ -1,6 +1,6 @@
 <!-- This is the /src/components/AppNavBar.vue file. -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref } from 'vue';
 import {
   Dialog,
   DialogPanel,
@@ -11,7 +11,7 @@ import {
   PopoverButton,
   PopoverGroup,
   PopoverPanel,
-} from '@headlessui/vue'
+} from '@headlessui/vue';
 import {
   ArrowPathIcon,
   Bars3Icon,
@@ -20,12 +20,15 @@ import {
   FingerPrintIcon,
   SquaresPlusIcon,
   XMarkIcon,
-} from '@heroicons/vue/24/outline'
+} from '@heroicons/vue/24/outline';
 import {
   ChevronDownIcon,
   PhoneIcon,
   PlayCircleIcon,
-} from '@heroicons/vue/20/solid'
+} from '@heroicons/vue/20/solid';
+import { usePlansStore } from '@/stores/plansStore';
+
+const store = usePlansStore();
 
 const products = [
   {
@@ -61,7 +64,7 @@ const products = [
     href: '#',
     icon: ArrowPathIcon,
   },
-]
+];
 const callsToAction = [
   {
     name: 'Watch demo',
@@ -73,9 +76,9 @@ const callsToAction = [
     href: '#',
     icon: PhoneIcon,
   },
-]
+];
 
-const mobileMenuOpen = ref(false)
+const mobileMenuOpen = ref(false);
 </script>
 
 <template>
