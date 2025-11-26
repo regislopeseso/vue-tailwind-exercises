@@ -19,8 +19,17 @@ export const usePlansStore = defineStore('plans', () => {
   const getPlanById = (id: Plan['id']) =>
     plans.value.find((plan) => plan.id === id);
 
-  // Computed (getters)
+  // Discount rules
+  function calculateDiscountPercentage(
+    quantity: number,
+  ): number {
+    if (quantity >= 5) return 35;
+    if (quantity >= 3) return 20;
+    if (quantity >= 2) return 10;
+    return 0;
+  }
 
+  // Computed (getters)
   // Shopping Cart Details (joined with plans data)
   const cartDetailed = computed(() => {
     return cart.value
@@ -29,14 +38,31 @@ export const usePlansStore = defineStore('plans', () => {
 
         if (!plan) return null;
 
+        const discountPercent = calculateDiscountPercentage(
+          item.quantity,
+        );
+        const lineSubtotal = plan.price * item.quantity;
+        const lineDiscount =
+          lineSubtotal * (discountPercent / 100);
+        const lineTotal = lineSubtotal - lineDiscount;
+
         return {
           ...item,
           plan,
-          lineTotal: plan.price * item.quantity,
+          lineSubtotal,
+          discountPercent,
+          lineDiscount,
+          lineTotal,
         };
       })
       .filter(Boolean) as Array<
-      CartItem & { plan: Plan; lineTotal: number }
+      CartItem & {
+        plan: Plan;
+        lineSubtotal: number;
+        discountPercent: number;
+        lineDiscount: number;
+        lineTotal: number;
+      }
     >;
   });
 
@@ -46,31 +72,23 @@ export const usePlansStore = defineStore('plans', () => {
 
   const subtotal = computed(() =>
     cartDetailed.value.reduce(
-      (sum, i) => sum + i.lineTotal,
+      (sum, i) => sum + i.lineSubtotal,
       0,
     ),
   );
 
-  // Discount rules
-  function calculateDiscountPercentage(
-    quantity: number,
-  ): number {
-    if (quantity >= 10) return 25;
-    if (quantity >= 5) return 15;
-    if (quantity >= 3) return 5;
-    return 0;
-  }
-
-  const discountPercent = computed(() =>
-    calculateDiscountPercentage(totalQuantity.value),
+  const discountAmount = computed(() =>
+    cartDetailed.value.reduce(
+      (sum, i) => sum + i.lineDiscount,
+      0,
+    ),
   );
 
-  const discountAmount = computed(
-    () => subtotal.value * (discountPercent.value / 100),
-  );
-
-  const total = computed(
-    () => subtotal.value - discountAmount.value,
+  const total = computed(() =>
+    cartDetailed.value.reduce(
+      (sum, i) => sum + i.lineTotal,
+      0,
+    ),
   );
 
   // Actions
@@ -123,7 +141,6 @@ export const usePlansStore = defineStore('plans', () => {
 
     totalQuantity,
     subtotal,
-    discountPercent,
     discountAmount,
     total,
 

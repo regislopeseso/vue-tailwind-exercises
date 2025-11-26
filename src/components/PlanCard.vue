@@ -45,18 +45,16 @@ function handlePlanSelection() {
 
 <template>
   <div
-    class="prose flex flex-col justify-between gap-5 w-sm h-[700px] bg-gray-900 p-5 rounded-2xl text-center"
+    class="flex flex-col justify-between gap-5 w-sm h-[700px] p-5 rounded-2xl text-center border-3 border-gray-600 dark:border-gray-600 dark:bg-gray-900 bg-gray-300"
   >
     <div
       class="flex flex-0 flex-col justify-center align-middle w-full"
     >
-      <h1 class="text-white p-0! m-0!">
+      <h2 class="text-4xl font-extrabold">
         {{ props.planTitle }}
-      </h1>
+      </h2>
 
-      <p
-        class="text-white italic text-center w-[60%] mx-auto"
-      >
+      <p class="italic text-center w-[60%] mx-auto">
         {{ props.planDescription }}
       </p>
     </div>
@@ -64,32 +62,30 @@ function handlePlanSelection() {
     <div
       class="flex flex-1 w-full m-auto flex-col justify-center items-center"
     >
-      <div class="flex justify-center items-baseline">
+      <div class="flex justify-center items-baseline gap-1">
         <h1
-          class="text-white p-0! m-0!"
+          class="text-5xl"
           :class="{
-            'line-through opacity-60 ': hasDiscount,
+            'line-through opacity-60 text-xl ': hasDiscount,
           }"
         >
           ${{ props.planPrice }}
         </h1>
 
-        <span class="text-white opacity-60">/month</span>
+        <span class="opacity-60"> /month</span>
       </div>
 
       <div
         v-if="hasDiscount"
         class="flex flex-0 justify-center items-baseline"
       >
-        <h1 class="text-white p-0! m-0!">
-          ${{ newPrice.toFixed(0) }}
-        </h1>
+        <h1 class="text-5xl">${{ newPrice.toFixed(0) }}</h1>
 
-        <span class="text-white opacity-60">/month</span>
+        <span class="opacity-60">/month</span>
       </div>
     </div>
 
-    <ul class="flex-0 text-white text-left space-y-2">
+    <ul class="flex-0 text-left space-y-2">
       <li
         v-for="(feature, i) in props.planFeatures"
         :key="i"
@@ -104,7 +100,7 @@ function handlePlanSelection() {
 
     <button
       type="button"
-      class="bg-blue-500 rounded w-full text-white font-semibold py-2 text-sm hover:font-bold"
+      class="font-semibold hover:font-bold py-4 text-xl border-3 rounded-2xl w-[80%] mx-auto hover:cursor-pointer border-gray-600 hover:border-green-500 text-white bg-blue-400 hover:bg-blue-500"
       @click="handlePlanSelection"
     >
       Add to Cart

@@ -2,7 +2,3 @@
 @import 'tailwindcss';
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
-
-body {
-  @apply bg-gray-950 text-white;
-}

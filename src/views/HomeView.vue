@@ -8,12 +8,17 @@ const store = usePlansStore();
 function pickPlan(id: number) {
   store.addToCart(id);
 }
+
+function getDiscountForPlan(planId: number): number {
+  const cartItem = store.cartDetailed.find(
+    (item) => item.planId === planId,
+  );
+  return cartItem?.discountPercent ?? 0;
+}
 </script>
 
 <template>
-  <main
-    class="flex py-10 h-auto items-center justify-center gap-5"
-  >
+  <div class="flex flex-wrap w-full justify-center gap-5">
     <PlanCard
       v-for="plan in store.plans"
       :key="plan.id"
@@ -21,8 +26,8 @@ function pickPlan(id: number) {
       :plan-description="plan.description"
       :plan-price="plan.price"
       :plan-features="plan.features"
-      :plan-discount="store.discountPercent"
+      :plan-discount="getDiscountForPlan(plan.id)"
       @select="pickPlan(plan.id)"
     />
-  </main>
+  </div>
 </template>

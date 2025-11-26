@@ -12,69 +12,30 @@ import {
   PopoverGroup,
   PopoverPanel,
 } from '@headlessui/vue';
-import {
-  ArrowPathIcon,
-  Bars3Icon,
-  ChartPieIcon,
-  CursorArrowRaysIcon,
-  FingerPrintIcon,
-  SquaresPlusIcon,
-  XMarkIcon,
-} from '@heroicons/vue/24/outline';
-import {
-  ChevronDownIcon,
-  PhoneIcon,
-  PlayCircleIcon,
-} from '@heroicons/vue/20/solid';
 import { usePlansStore } from '@/stores/plansStore';
+import { useRouter } from 'vue-router';
+import {
+  Bars3Icon,
+  XMarkIcon,
+  FaceFrownIcon,
+  CreditCardIcon,
+  ShoppingCartIcon,
+  ChevronDownIcon,
+} from '@heroicons/vue/16/solid';
 
 const store = usePlansStore();
+const router = useRouter();
 
-const products = [
-  {
-    name: 'Analytics',
-    description:
-      'Get a better understanding of your traffic',
-    href: '#',
-    icon: ChartPieIcon,
-  },
-  {
-    name: 'Engagement',
-    description: 'Speak directly to your customers',
-    href: '#',
-    icon: CursorArrowRaysIcon,
-  },
-  {
-    name: 'Security',
-    description:
-      'Your customers’ data will be safe and secure',
-    href: '#',
-    icon: FingerPrintIcon,
-  },
-  {
-    name: 'Integrations',
-    description: 'Connect with third-party tools',
-    href: '#',
-    icon: SquaresPlusIcon,
-  },
-  {
-    name: 'Automations',
-    description:
-      'Build strategic funnels that will convert',
-    href: '#',
-    icon: ArrowPathIcon,
-  },
-];
 const callsToAction = [
   {
-    name: 'Watch demo',
-    href: '#',
-    icon: PlayCircleIcon,
+    name: 'Clear Cart',
+    action: () => store.clearCart(),
+    icon: FaceFrownIcon,
   },
   {
-    name: 'Contact sales',
-    href: '#',
-    icon: PhoneIcon,
+    name: 'Checkout',
+    action: () => router.push('/checkout'),
+    icon: CreditCardIcon,
   },
 ];
 
@@ -82,7 +43,7 @@ const mobileMenuOpen = ref(false);
 </script>
 
 <template>
-  <header class="bg-gray-900">
+  <header class="bg-gray-600 dark:bg-gray-900">
     <nav
       class="mx-auto flex items-center p-6 justify-between"
       aria-label="Global"
@@ -154,6 +115,12 @@ const mobileMenuOpen = ref(false);
             class="flex items-center gap-x-1 text-sm/6 font-semibold text-white"
           >
             Shopping Cart
+            <span
+              v-if="store.totalQuantity > 0"
+              class="ml-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-500 rounded-full"
+            >
+              {{ store.totalQuantity }}
+            </span>
             <ChevronDownIcon
               class="size-5 flex-none text-gray-500"
               aria-hidden="true"
@@ -173,40 +140,103 @@ const mobileMenuOpen = ref(false);
             >
               <div class="p-4">
                 <div
-                  v-for="item in products"
-                  :key="item.name"
-                  class="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm/6 hover:bg-white/5"
+                  v-if="store.cartDetailed.length === 0"
+                  class="text-center py-8"
+                >
+                  <ShoppingCartIcon
+                    class="w-12 h-12 mx-auto text-gray-500 mb-2"
+                  />
+                  <p class="text-gray-400 text-sm">
+                    Your cart is empty
+                  </p>
+                </div>
+
+                <div
+                  v-for="item in store.cartDetailed"
+                  :key="item.planId"
+                  class="flex justify-between items-center rounded-lg p-4 text-sm/6 hover:bg-white/5"
                 >
                   <div
-                    class="flex size-11 flex-none items-center justify-center rounded-lg bg-gray-700/50 group-hover:bg-gray-700"
+                    class="flex flex-2 items-baseline justify-start p-2 rounded-lg gap-1"
                   >
-                    <component
-                      :is="item.icon"
-                      class="size-6 text-gray-400 group-hover:text-white"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div class="flex-auto">
-                    <a
-                      :href="item.href"
-                      class="block font-semibold text-white"
+                    <span
+                      class="text-lg font-bold text-white"
                     >
-                      {{ item.name }}
-                      <span class="absolute inset-0"></span>
-                    </a>
+                      {{ item.plan.title }}
+                    </span>
+                    <span
+                      class="text-sm font-semibold text-white"
+                    >
+                      ({{ item.quantity }}x)</span
+                    >
+                  </div>
+
+                  <div class="flex-1">
                     <p class="mt-1 text-gray-400">
-                      {{ item.description }}
+                      ${{ item.plan.price }} ×
+                      {{ item.quantity }}
+                      <span
+                        v-if="item.discountPercent > 0"
+                        class="text-green-400"
+                      >
+                        ({{ item.discountPercent }}% off)
+                      </span>
                     </p>
+                    <p class="text-white font-semibold">
+                      Total: ${{
+                        item.lineTotal.toFixed(2)
+                      }}
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  v-if="store.cartDetailed.length > 0"
+                  class="mt-4 pt-4 border-t border-white/10"
+                >
+                  <div
+                    class="flex justify-between text-white px-4"
+                  >
+                    <span class="font-semibold"
+                      >Subtotal:</span
+                    >
+                    <span
+                      >${{
+                        store.subtotal.toFixed(2)
+                      }}</span
+                    >
+                  </div>
+                  <div
+                    v-if="store.discountAmount > 0"
+                    class="flex justify-between text-green-400 px-4 mt-1"
+                  >
+                    <span class="font-semibold"
+                      >Discount:</span
+                    >
+                    <span
+                      >-${{
+                        store.discountAmount.toFixed(2)
+                      }}</span
+                    >
+                  </div>
+                  <div
+                    class="flex justify-between text-white font-bold px-4 mt-2 text-lg"
+                  >
+                    <span>Total:</span>
+                    <span
+                      >${{ store.total.toFixed(2) }}</span
+                    >
                   </div>
                 </div>
               </div>
               <div
+                v-if="store.cartDetailed.length > 0"
                 class="grid grid-cols-2 divide-x divide-white/10 bg-gray-700/50"
               >
-                <a
+                <button
                   v-for="item in callsToAction"
                   :key="item.name"
-                  :href="item.href"
+                  @click="item.action"
                   class="flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-white hover:bg-gray-700/50"
                 >
                   <component
@@ -215,21 +245,34 @@ const mobileMenuOpen = ref(false);
                     aria-hidden="true"
                   />
                   {{ item.name }}
-                </a>
+                </button>
               </div>
             </PopoverPanel>
           </transition>
         </Popover>
       </PopoverGroup>
 
-      <div class="hidden lg:flex lg:justify-end flex-none">
+      <div
+        class="hidden lg:flex lg:justify-end flex-none rounded p-2"
+      >
         <RouterLink
           to="/checkout"
-          class="text-sm/6 font-semibold text-white"
-          >Checkout<span aria-hidden="true"
-            >&rarr;</span
-          ></RouterLink
+          class="relative text-sm/6 font-semibold text-white inline-flex items-center gap-2"
         >
+          <div
+            class="flex w-full justify-center items-center gap-2"
+          >
+            <span>Checkout</span>
+
+            <span
+              v-if="store.totalQuantity > 0"
+              class="flex items-center justify-center w-full h-5 text-xs font-bold text-white"
+            >
+              ( {{ store.totalQuantity }} items )
+            </span>
+          </div>
+          <span aria-hidden="true">&rarr;</span>
+        </RouterLink>
       </div>
     </nav>
 
@@ -263,8 +306,11 @@ const mobileMenuOpen = ref(false);
             />
           </a>
 
-          <a href="#" class="-m-1.5 p-1.5">
-            <span class="sr-only">Your Company</span>
+          <a
+            href="https://tailwindcss.com/"
+            target="_blank"
+          >
+            <span class="sr-only">Tailwind Webpage</span>
 
             <img
               class="h-8 w-auto"
@@ -301,7 +347,15 @@ const mobileMenuOpen = ref(false);
                 <DisclosureButton
                   class="flex w-full items-center justify-between rounded-lg py-2 pr-3.5 pl-3 text-base/7 font-semibold text-white hover:bg-white/5"
                 >
-                  Shopping Cart
+                  <span class="flex items-center gap-2">
+                    Shopping Cart
+                    <span
+                      v-if="store.totalQuantity > 0"
+                      class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-500 rounded-full"
+                    >
+                      {{ store.totalQuantity }}
+                    </span>
+                  </span>
                   <ChevronDownIcon
                     :class="[
                       open ? 'rotate-180' : '',
@@ -311,26 +365,112 @@ const mobileMenuOpen = ref(false);
                   />
                 </DisclosureButton>
                 <DisclosurePanel class="mt-2 space-y-2">
-                  <DisclosureButton
-                    v-for="item in [
-                      ...products,
-                      ...callsToAction,
-                    ]"
-                    :key="item.name"
-                    as="a"
-                    :href="item.href"
-                    class="block rounded-lg py-2 pr-3 pl-6 text-sm/7 font-semibold text-white hover:bg-white/5"
-                    >{{ item.name }}</DisclosureButton
+                  <div
+                    v-if="store.cartDetailed.length === 0"
+                    class="text-center py-4 px-6"
                   >
+                    <p class="text-gray-400 text-sm">
+                      Your cart is empty
+                    </p>
+                  </div>
+
+                  <div
+                    v-for="item in store.cartDetailed"
+                    :key="item.planId"
+                    class="block rounded-lg py-2 pr-3 pl-6 text-sm/7 text-white"
+                  >
+                    <p class="font-semibold">
+                      {{ item.plan.title }}
+                    </p>
+                    <p class="text-gray-400 text-xs">
+                      Quantity: {{ item.quantity }} × ${{
+                        item.plan.price
+                      }}
+                      <span
+                        v-if="item.discountPercent > 0"
+                        class="text-green-400"
+                      >
+                        ({{ item.discountPercent }}% off)
+                      </span>
+                    </p>
+                    <p
+                      class="text-white font-semibold text-xs"
+                    >
+                      Total: ${{
+                        item.lineTotal.toFixed(2)
+                      }}
+                    </p>
+                  </div>
+
+                  <div
+                    v-if="store.cartDetailed.length > 0"
+                    class="border-t border-white/10 pt-2 mt-2 px-6"
+                  >
+                    <div
+                      class="flex justify-between text-white text-sm"
+                    >
+                      <span>Subtotal:</span>
+                      <span
+                        >${{
+                          store.subtotal.toFixed(2)
+                        }}</span
+                      >
+                    </div>
+                    <div
+                      v-if="store.discountAmount > 0"
+                      class="flex justify-between text-green-400 text-sm"
+                    >
+                      <span>Discount:</span>
+                      <span
+                        >-${{
+                          store.discountAmount.toFixed(2)
+                        }}</span
+                      >
+                    </div>
+                    <div
+                      class="flex justify-between text-white font-bold mt-1"
+                    >
+                      <span>Total:</span>
+                      <span
+                        >${{ store.total.toFixed(2) }}</span
+                      >
+                    </div>
+                  </div>
+
+                  <div
+                    v-if="store.cartDetailed.length > 0"
+                    class="flex flex-col gap-2 pt-2 px-6"
+                  >
+                    <button
+                      @click="store.clearCart()"
+                      class="w-full rounded-lg py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700"
+                    >
+                      Clear Cart
+                    </button>
+                    <RouterLink
+                      to="/checkout"
+                      @click="mobileMenuOpen = false"
+                      class="w-full rounded-lg py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 text-center"
+                    >
+                      Checkout
+                    </RouterLink>
+                  </div>
                 </DisclosurePanel>
               </Disclosure>
             </div>
             <div class="py-6">
               <RouterLink
                 to="/checkout"
-                class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-white hover:bg-white/5"
-                >Checkout</RouterLink
+                class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-white hover:bg-white/5 inline-flex items-center gap-2"
               >
+                Checkout
+                <span
+                  v-if="store.totalQuantity > 0"
+                  class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-500 rounded-full"
+                >
+                  {{ store.totalQuantity }}
+                </span>
+              </RouterLink>
             </div>
           </div>
         </div>
