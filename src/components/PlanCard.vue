@@ -52,7 +52,7 @@ function handlePlanSelection() {
 
 <template>
   <div
-    class="flex flex-col justify-between gap-5 w-sm h-[700px] p-5 rounded-2xl text-center border-3 border-gray-600 dark:border-gray-600 dark:bg-gray-900 bg-gray-300"
+    class="flex flex-col justify-between gap-5 w-sm h-[700px] p-5 rounded-2xl text-center border-3 border-gray-600 dark:border-gray-600 dark:bg-gray-800 bg-gray-300"
   >
     <div
       class="flex flex-0 flex-col justify-center align-middle w-full"

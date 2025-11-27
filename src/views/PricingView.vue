@@ -1,6 +1,6 @@
 <!-- This is the /src/views/PrincingView.vue file. -->
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { usePlansStore } from '@/stores/plansStore.ts';
 import type { BillingPeriod } from '@/assets/domain/type.ts';
 import PlanCard from '@/components/PlanCard.vue';
@@ -26,6 +26,21 @@ function getDiscountForPlan(planId: number): number {
   );
   return cartItem?.discountPercent ?? 0;
 }
+
+// controls the one-shot sweep animation
+const sweep = ref(false);
+
+// whenever isYearly changes, retrigger the sweep
+watch(isYearly, () => {
+  sweep.value = false;
+  requestAnimationFrame(() => {
+    sweep.value = true;
+  });
+});
+
+function onSweepEnd() {
+  sweep.value = false;
+}
 </script>
 
 <template>
@@ -33,15 +48,15 @@ function getDiscountForPlan(planId: number): number {
     class="flex flex-col justify-center items-center gap-5"
   >
     <label
-      class="inline-flex items-center cursor-pointer border-3 border-gray-600 p-2 rounded-xl gap-3"
+      class="inline-flex items-center cursor-pointer border-3 border-gray-600 p-3 rounded-xl gap-3"
     >
       <span
-        class="select-none text-sm font-medium text-heading"
+        class="select-none text-sm font-medium text-heading underline underline-offset-4 decoration-4 decoration-transparent transition-[text-decoration-color] duration-100 delay-100"
         :class="{
-          'font-extrabold!': isYearly === false,
+          'decoration-blue-400! font-extrabold!': !isYearly,
         }"
       >
-        Monthly
+        Monthly Billing
       </span>
 
       <input
@@ -50,22 +65,27 @@ function getDiscountForPlan(planId: number): number {
         class="sr-only peer"
       />
 
+      <!-- Invisible track; animated line appears only during sweep -->
       <div
-        :class="[
-          'relative w-[400px] h-5 bg-neutral-quaternary rounded-full peer  peer-checked:after:translate-x-80',
-          'peer-focus:ring-red-300 dark:peer-focus:ring-gray-600 dark:bg-gray-700 after:bg-white peer-checked:bg-red-600 dark:peer-checked:bg-gray-600 peer-checked:after:border-white',
-          'rtl:peer-checked:after:-translate-x-[400%] after:absolute after:top-0.5 after:start-0.5  after:rounded-full after:h-4 after:w-20 after:transition-all ',
-          `after:content-['']`,
-        ]"
-      ></div>
+        class="relative w-[400px] h-0.5 rounded-full bg-gray-600 dark:bg-gray-700"
+      >
+        <span
+          class="absolute top-3 left-0 h-1 w-20 rounded-full bg-blue-400 opacity-0"
+          :class="{
+            'sweep-ltr': sweep && isYearly,
+            'sweep-rtl': sweep && !isYearly,
+          }"
+          @animationend="onSweepEnd"
+        ></span>
+      </div>
 
       <span
-        class="select-none text-sm font-medium text-heading"
+        class="select-none text-sm font-medium text-heading underline underline-offset-4 decoration-4 decoration-transparent transition-[text-decoration-color] duration-100 delay-100"
         :class="{
-          'font-extrabold!': isYearly === true,
+          'decoration-blue-400! font-extrabold!': isYearly,
         }"
       >
-        Yearly
+        Yearly Billing
       </span>
     </label>
 
@@ -84,3 +104,49 @@ function getDiscountForPlan(planId: number): number {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* line moves left -> right and fades out */
+.sweep-ltr {
+  animation: sweep-ltr 250ms ease-out forwards;
+}
+
+/* line moves right -> left and fades out */
+.sweep-rtl {
+  animation: sweep-rtl 250ms ease-out forwards;
+}
+
+@keyframes sweep-ltr {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(320px);
+    opacity: 0;
+  }
+}
+
+@keyframes sweep-rtl {
+  0% {
+    transform: translateX(320px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+}
+</style>

@@ -46,12 +46,21 @@ const mobileMenuOpen = ref(false);
 function periodLabel(period: 'monthly' | 'yearly') {
   return period === 'yearly' ? '/year' : '/month';
 }
+
+function checkcoutLabel() {
+  return store.totalQuantity > 1 ? 'items' : 'item';
+}
+
+const formatMoney = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+}).format;
 </script>
 
 <template>
-  <header class="bg-gray-600 dark:bg-gray-900">
+  <header class="bg-gray-600 dark:bg-gray-800">
     <nav
-      class="mx-auto flex items-center p-6 justify-between"
+      class="mx-auto flex items-center px-5 h-20 justify-between"
       aria-label="Global"
     >
       <!-- logos left side -->
@@ -111,27 +120,27 @@ function periodLabel(period: 'monthly' | 'yearly') {
 
       <!-- desktop nav -->
       <PopoverGroup
-        class="hidden lg:flex lg:gap-x-12 lg:justify-center grow"
+        class="hidden lg:flex lg:gap-x-12 lg:justify-center items-center grow"
       >
         <RouterLink
           to="/pricing"
-          class="text-sm/6 font-semibold text-white"
+          class="text-xl/6 font-semibold text-white pl-3"
           >Princing</RouterLink
         >
 
         <Popover class="relative">
           <PopoverButton
-            class="flex items-center gap-x-1 text-sm/6 font-semibold text-white"
+            class="flex items-center gap-x-1 text-xl/6 font-semibold text-white focus:outline-none focus:ring-0 focus-visible:outline-none"
           >
             Shopping Cart
             <span
               v-if="store.totalQuantity > 0"
-              class="ml-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-500 rounded-full"
+              class="ml-2 inline-flex items-center justify-center w-8 h-8 text-lg/6 font-bold text-white bg-blue-500 rounded-full"
             >
               {{ store.totalQuantity }}
             </span>
             <ChevronDownIcon
-              class="size-5 flex-none text-gray-500"
+              class="size-8 flex-none text-white dark:text-gray-500"
               aria-hidden="true"
             />
           </PopoverButton>
@@ -145,7 +154,11 @@ function periodLabel(period: 'monthly' | 'yearly') {
             leave-to-class="opacity-0 translate-y-1"
           >
             <PopoverPanel
-              class="absolute left-1/2 z-10 mt-3 w-screen max-w-md -translate-x-1/2 overflow-hidden rounded-3xl bg-gray-800 outline-1 -outline-offset-1 outline-white/10"
+              class="absolute left-1/2 z-10 mt-3 w-[800px] max-w-6xl -translate-x-1/2 overflow-hidden rounded-3xl bg-gray-600 dark:bg-gray-800 outline-1 -outline-offset-1 outline-white/10 border-2 border-gray-600"
+              :class="{
+                'w-[200px]!':
+                  store.cartDetailed.length === 0,
+              }"
             >
               <div class="p-4">
                 <!-- empty cart -->
@@ -185,7 +198,7 @@ function periodLabel(period: 'monthly' | 'yearly') {
                     </span>
                   </div>
 
-                  <div class="flex-1">
+                  <div class="flex-2 text-end">
                     <p class="mt-1 text-gray-400">
                       ${{ item.unitPrice.toFixed(2) }}
                       {{ periodLabel(item.period) }} ×
@@ -199,7 +212,7 @@ function periodLabel(period: 'monthly' | 'yearly') {
                     </p>
                     <p class="text-white font-semibold">
                       Total: ${{
-                        item.lineTotal.toFixed(2)
+                        formatMoney(item.lineTotal)
                       }}
                     </p>
                   </div>
@@ -218,7 +231,7 @@ function periodLabel(period: 'monthly' | 'yearly') {
                     >
                     <span
                       >${{
-                        store.subtotal.toFixed(2)
+                        formatMoney(store.subtotal)
                       }}</span
                     >
                   </div>
@@ -231,7 +244,7 @@ function periodLabel(period: 'monthly' | 'yearly') {
                     >
                     <span
                       >-${{
-                        store.discountAmount.toFixed(2)
+                        formatMoney(store.discountAmount)
                       }}</span
                     >
                   </div>
@@ -240,7 +253,7 @@ function periodLabel(period: 'monthly' | 'yearly') {
                   >
                     <span>Total:</span>
                     <span
-                      >${{ store.total.toFixed(2) }}</span
+                      >${{ formatMoney(store.total) }}</span
                     >
                   </div>
                 </div>
@@ -249,17 +262,17 @@ function periodLabel(period: 'monthly' | 'yearly') {
               <!-- Buttons -->
               <div
                 v-if="store.cartDetailed.length > 0"
-                class="grid grid-cols-2 divide-x divide-white/10 bg-gray-700/50"
+                class="grid grid-cols-2 divide-x divide-white/30 bg-blue-400"
               >
                 <button
                   v-for="item in callsToAction"
                   :key="item.name"
                   @click="item.action"
-                  class="flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-white hover:bg-gray-700/50"
+                  class="flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-white hover:bg-blue-500"
                 >
                   <component
                     :is="item.icon"
-                    class="size-5 flex-none text-gray-500"
+                    class="size-5 flex-none text-white"
                     aria-hidden="true"
                   />
                   {{ item.name }}
@@ -276,21 +289,39 @@ function periodLabel(period: 'monthly' | 'yearly') {
       >
         <RouterLink
           to="/checkout"
-          class="relative text-sm/6 font-semibold text-white inline-flex items-center gap-2"
+          class="relative text-xl/6 font-semibold text-white inline-flex items-center gap-2"
         >
           <div
             class="flex w-full justify-center items-center gap-2"
           >
-            <span>Checkout</span>
+            <span
+              :class="{
+                'animate-bounce font-extrabold! text-2xl':
+                  store.totalQuantity > 0,
+              }"
+              >Checkout</span
+            >
 
             <span
               v-if="store.totalQuantity > 0"
-              class="flex items-center justify-center w-full h-5 text-xs font-bold text-white"
+              :class="{
+                'animate-bounce font-extrabold! ':
+                  store.totalQuantity > 0,
+              }"
+              class="inline-flex items-center justify-center p-2 h-10 text-md font-bold text-white bg-blue-500 rounded"
             >
-              ( {{ store.totalQuantity }} items )
+              {{ store.totalQuantity }}
+              {{ checkcoutLabel() }}
             </span>
           </div>
-          <span aria-hidden="true">&rarr;</span>
+          <span
+            :class="{
+              'animate-bounce text-4xl! font-extrabold! ':
+                store.totalQuantity > 0,
+            }"
+            aria-hidden="true"
+            >&rarr;</span
+          >
         </RouterLink>
       </div>
     </nav>
@@ -303,7 +334,7 @@ function periodLabel(period: 'monthly' | 'yearly') {
     >
       <div class="fixed inset-0 z-50"></div>
       <DialogPanel
-        class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-900 p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-100/10"
+        class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-800 p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-100/10"
       >
         <!-- header logos + close -->
         <div class="flex items-center justify-between">
