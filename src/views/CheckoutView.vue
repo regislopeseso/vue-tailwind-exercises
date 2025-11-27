@@ -1,12 +1,9 @@
-<!-- This is the /src/views/CheckoutView.vue file. -->
 <script setup lang="ts">
-import CheckoutForm from '@/components/CheckoutForm.vue';
+import CartCheckout from '@/components/checkout/CartCheckout.vue';
 </script>
 
 <template>
-  <main>
-    <CheckoutForm />
-  </main>
+  <div class="max-w-8xl m-auto my-10">
+    <CartCheckout />
+  </div>
 </template>
-
-<style></style>

@@ -23,7 +23,10 @@ import {
   CreditCardIcon,
   ShoppingCartIcon,
   ChevronDownIcon,
+  PlusCircleIcon,
+  MinusCircleIcon,
 } from '@heroicons/vue/16/solid';
+import type { BillingPeriod } from '@/assets/domain/type';
 
 const store = usePlansStore();
 const router = useRouter();
@@ -49,6 +52,27 @@ function periodLabel(period: 'monthly' | 'yearly') {
 
 function checkcoutLabel() {
   return store.totalQuantity > 1 ? 'items' : 'item';
+}
+
+function handleIncrementToCart(
+  planId: number,
+  period: BillingPeriod,
+) {
+  store.addToCart(planId, period, 1);
+}
+
+function handleDecrementFromCart(
+  planId: number,
+  period: BillingPeriod,
+) {
+  store.decrementFromCart(planId, period, 1);
+}
+
+function handleRemoveFromCart(
+  planId: number,
+  period: BillingPeriod,
+) {
+  store.removeFromCart(planId, period);
 }
 
 const formatMoney = new Intl.NumberFormat('en-US', {
@@ -130,7 +154,7 @@ const formatMoney = new Intl.NumberFormat('en-US', {
 
         <Popover class="relative">
           <PopoverButton
-            class="flex items-center gap-x-1 text-xl/6 font-semibold text-white focus:outline-none focus:ring-0 focus-visible:outline-none"
+            class="flex items-center gap-x-1 text-xl/6 font-semibold text-white focus:outline-none focus:ring-0 focus-visible:outline-none cursor-pointer"
           >
             Shopping Cart
             <span
@@ -139,6 +163,7 @@ const formatMoney = new Intl.NumberFormat('en-US', {
             >
               {{ store.totalQuantity }}
             </span>
+
             <ChevronDownIcon
               class="size-8 flex-none text-white dark:text-gray-500"
               aria-hidden="true"
@@ -154,7 +179,7 @@ const formatMoney = new Intl.NumberFormat('en-US', {
             leave-to-class="opacity-0 translate-y-1"
           >
             <PopoverPanel
-              class="absolute left-1/2 z-10 mt-3 w-[800px] max-w-6xl -translate-x-1/2 overflow-hidden rounded-3xl bg-gray-600 dark:bg-gray-800 outline-1 -outline-offset-1 outline-white/10 border-2 border-gray-600"
+              class="absolute left-1/2 z-99 mt-3 w-[800px] max-w-6xl -translate-x-1/2 overflow-hidden rounded-3xl bg-gray-600 dark:bg-gray-800 outline-1 -outline-offset-1 outline-white/10 border-2 border-gray-600"
               :class="{
                 'w-[200px]!':
                   store.cartDetailed.length === 0,
@@ -178,8 +203,29 @@ const formatMoney = new Intl.NumberFormat('en-US', {
                 <div
                   v-for="item in store.cartDetailed"
                   :key="`${item.planId}-${item.period}`"
-                  class="flex justify-between items-center rounded-lg p-4 text-sm/6 hover:bg-white/5"
+                  class="flex justify-between items-center rounded-lg p-4 text-sm/6 hover:bg-white/5 gap-3"
                 >
+                  <PlusCircleIcon
+                    class="size-6 hover:text-blue-400 cursor-pointer"
+                    aria-hidden="true"
+                    @click="
+                      handleIncrementToCart(
+                        item.planId,
+                        item.period,
+                      )
+                    "
+                  />
+
+                  <MinusCircleIcon
+                    class="size-6 hover:text-red-400 cursor-pointer"
+                    aria-hidden="true"
+                    @click="
+                      handleDecrementFromCart(
+                        item.planId,
+                        item.period,
+                      )
+                    "
+                  />
                   <div
                     class="flex flex-2 items-baseline justify-start p-2 rounded-lg gap-1"
                   >
@@ -187,6 +233,7 @@ const formatMoney = new Intl.NumberFormat('en-US', {
                       class="text-lg font-bold text-white"
                     >
                       {{ item.plan.title }}
+                      <button></button>
                     </span>
                     <span
                       class="text-sm font-semibold text-white"
@@ -198,7 +245,7 @@ const formatMoney = new Intl.NumberFormat('en-US', {
                     </span>
                   </div>
 
-                  <div class="flex-2 text-end">
+                  <div class="flex-2 text-end pe-3">
                     <p class="mt-1 text-gray-400">
                       ${{ item.unitPrice.toFixed(2) }}
                       {{ periodLabel(item.period) }} ×
@@ -216,6 +263,16 @@ const formatMoney = new Intl.NumberFormat('en-US', {
                       }}
                     </p>
                   </div>
+
+                  <XMarkIcon
+                    class="size-8 top-0 hover:text-red-400 cursor-pointer"
+                    @click="
+                      handleRemoveFromCart(
+                        item.planId,
+                        item.period,
+                      )
+                    "
+                  />
                 </div>
 
                 <!-- totals -->
@@ -268,7 +325,7 @@ const formatMoney = new Intl.NumberFormat('en-US', {
                   v-for="item in callsToAction"
                   :key="item.name"
                   @click="item.action"
-                  class="flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-white hover:bg-blue-500"
+                  class="flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-white hover:bg-blue-500 cursor-pointer"
                 >
                   <component
                     :is="item.icon"
