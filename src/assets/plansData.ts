@@ -1,11 +1,5 @@
 // This is the /src/assets/data.ts file
-export type Plan = {
-  id: number; // or string, but be consistent
-  title: string;
-  description: string;
-  price: number;
-  features: string[];
-};
+import type { Plan } from '@/assets/domain/type.ts';
 
 const plans: Plan[] = [
   {
@@ -13,7 +7,10 @@ const plans: Plan[] = [
     title: 'Starter',
     description:
       'Best option for personal use & for your next project.',
-    price: 29,
+    prices: {
+      monthly: 29,
+      yearly: 289,
+    },
     features: [
       'Unlimited Access',
       '24/7 Customer Support',
@@ -28,7 +25,10 @@ const plans: Plan[] = [
     title: 'Plus',
     description:
       'Great for small teams and anyone looking to scale',
-    price: 50,
+    prices: {
+      monthly: 50,
+      yearly: 499,
+    },
     features: [
       'Starter Plan Features',
       'Multi-User Collaboration Tools',
@@ -43,7 +43,10 @@ const plans: Plan[] = [
     title: 'Enterprise',
     description:
       'Best for large users and extended redistribution rights.',
-    price: 150,
+    prices: {
+      monthly: 150,
+      yearly: 1499,
+    },
     features: [
       'Starter & Plus Plan Features',
       'Priority Feature Updates',

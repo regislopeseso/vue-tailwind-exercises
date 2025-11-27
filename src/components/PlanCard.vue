@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { BillingPeriod } from '@/assets/domain/type.ts';
 
 type Props = {
   planTitle?: string;
   planDescription?: string;
+  period?: BillingPeriod;
   planPrice?: number;
   planDiscount?: number;
   planFeatures?: string[];
@@ -12,10 +14,15 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {
   planTitle: 'Plan Title',
   planDescription: 'Plan Description',
+  period: 'monthly',
   planPrice: 0,
   planDiscount: 0,
   planFeatures: () => [],
 });
+
+const periodLabel = computed(() =>
+  props.period === 'yearly' ? '/year' : '/month',
+);
 
 const newPrice = computed(() => {
   const price = props.planPrice ?? 0;
@@ -72,7 +79,7 @@ function handlePlanSelection() {
           ${{ props.planPrice }}
         </h1>
 
-        <span class="opacity-60"> /month</span>
+        <span class="opacity-60"> {{ periodLabel }} </span>
       </div>
 
       <div

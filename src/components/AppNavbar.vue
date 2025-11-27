@@ -1,6 +1,9 @@
 <!-- This is the /src/components/AppNavBar.vue file. -->
 <script setup lang="ts">
 import { ref } from 'vue';
+import { usePlansStore } from '@/stores/plansStore';
+import { useRouter } from 'vue-router';
+
 import {
   Dialog,
   DialogPanel,
@@ -12,8 +15,7 @@ import {
   PopoverGroup,
   PopoverPanel,
 } from '@headlessui/vue';
-import { usePlansStore } from '@/stores/plansStore';
-import { useRouter } from 'vue-router';
+
 import {
   Bars3Icon,
   XMarkIcon,
@@ -40,6 +42,10 @@ const callsToAction = [
 ];
 
 const mobileMenuOpen = ref(false);
+
+function periodLabel(period: 'monthly' | 'yearly') {
+  return period === 'yearly' ? '/year' : '/month';
+}
 </script>
 
 <template>
@@ -48,6 +54,7 @@ const mobileMenuOpen = ref(false);
       class="mx-auto flex items-center p-6 justify-between"
       aria-label="Global"
     >
+      <!-- logos left side -->
       <div class="flex flex-none gap-3">
         <div class="flex">
           <a href="https://vuejs.org/" target="_blank">
@@ -89,6 +96,7 @@ const mobileMenuOpen = ref(false);
         </div>
       </div>
 
+      <!-- mobile hamburger -->
       <div class="flex lg:hidden ps-5">
         <button
           type="button"
@@ -101,13 +109,14 @@ const mobileMenuOpen = ref(false);
         </button>
       </div>
 
+      <!-- desktop nav -->
       <PopoverGroup
         class="hidden lg:flex lg:gap-x-12 lg:justify-center grow"
       >
         <RouterLink
-          to="/home"
+          to="/pricing"
           class="text-sm/6 font-semibold text-white"
-          >Home</RouterLink
+          >Princing</RouterLink
         >
 
         <Popover class="relative">
@@ -139,6 +148,7 @@ const mobileMenuOpen = ref(false);
               class="absolute left-1/2 z-10 mt-3 w-screen max-w-md -translate-x-1/2 overflow-hidden rounded-3xl bg-gray-800 outline-1 -outline-offset-1 outline-white/10"
             >
               <div class="p-4">
+                <!-- empty cart -->
                 <div
                   v-if="store.cartDetailed.length === 0"
                   class="text-center py-8"
@@ -151,9 +161,10 @@ const mobileMenuOpen = ref(false);
                   </p>
                 </div>
 
+                <!-- cart lines -->
                 <div
                   v-for="item in store.cartDetailed"
-                  :key="item.planId"
+                  :key="`${item.planId}-${item.period}`"
                   class="flex justify-between items-center rounded-lg p-4 text-sm/6 hover:bg-white/5"
                 >
                   <div
@@ -169,11 +180,15 @@ const mobileMenuOpen = ref(false);
                     >
                       ({{ item.quantity }}x)</span
                     >
+                    <span class="text-xs text-gray-400">
+                      {{ item.period }}
+                    </span>
                   </div>
 
                   <div class="flex-1">
                     <p class="mt-1 text-gray-400">
-                      ${{ item.plan.price }} ×
+                      ${{ item.unitPrice.toFixed(2) }}
+                      {{ periodLabel(item.period) }} ×
                       {{ item.quantity }}
                       <span
                         v-if="item.discountPercent > 0"
@@ -190,6 +205,7 @@ const mobileMenuOpen = ref(false);
                   </div>
                 </div>
 
+                <!-- totals -->
                 <div
                   v-if="store.cartDetailed.length > 0"
                   class="mt-4 pt-4 border-t border-white/10"
@@ -229,6 +245,8 @@ const mobileMenuOpen = ref(false);
                   </div>
                 </div>
               </div>
+
+              <!-- Buttons -->
               <div
                 v-if="store.cartDetailed.length > 0"
                 class="grid grid-cols-2 divide-x divide-white/10 bg-gray-700/50"
@@ -252,6 +270,7 @@ const mobileMenuOpen = ref(false);
         </Popover>
       </PopoverGroup>
 
+      <!-- desktop checkout link -->
       <div
         class="hidden lg:flex lg:justify-end flex-none rounded p-2"
       >
@@ -276,6 +295,7 @@ const mobileMenuOpen = ref(false);
       </div>
     </nav>
 
+    <!-- mobile dialog -->
     <Dialog
       class="lg:hidden"
       @close="mobileMenuOpen = false"
@@ -285,6 +305,7 @@ const mobileMenuOpen = ref(false);
       <DialogPanel
         class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-900 p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-100/10"
       >
+        <!-- header logos + close -->
         <div class="flex items-center justify-between">
           <a href="https://vuejs.org/" target="_blank">
             <span class="sr-only">Vue Js Webpage</span>
@@ -334,9 +355,9 @@ const mobileMenuOpen = ref(false);
           <div class="-my-6 divide-y divide-white/10">
             <div class="space-y-2 py-6">
               <RouterLink
-                to="/home"
+                to="/princing"
                 class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-white hover:bg-white/5"
-                >Home</RouterLink
+                >Pricing</RouterLink
               >
 
               <Disclosure
@@ -356,6 +377,7 @@ const mobileMenuOpen = ref(false);
                       {{ store.totalQuantity }}
                     </span>
                   </span>
+
                   <ChevronDownIcon
                     :class="[
                       open ? 'rotate-180' : '',
@@ -364,6 +386,7 @@ const mobileMenuOpen = ref(false);
                     aria-hidden="true"
                   />
                 </DisclosureButton>
+
                 <DisclosurePanel class="mt-2 space-y-2">
                   <div
                     v-if="store.cartDetailed.length === 0"
@@ -376,7 +399,7 @@ const mobileMenuOpen = ref(false);
 
                   <div
                     v-for="item in store.cartDetailed"
-                    :key="item.planId"
+                    :key="`${item.planId}-${item.period}`"
                     class="block rounded-lg py-2 pr-3 pl-6 text-sm/7 text-white"
                   >
                     <p class="font-semibold">
@@ -384,8 +407,9 @@ const mobileMenuOpen = ref(false);
                     </p>
                     <p class="text-gray-400 text-xs">
                       Quantity: {{ item.quantity }} × ${{
-                        item.plan.price
+                        item.unitPrice.toFixed(2)
                       }}
+                      {{ periodLabel(item.period) }}
                       <span
                         v-if="item.discountPercent > 0"
                         class="text-green-400"

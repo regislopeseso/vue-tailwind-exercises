@@ -1,70 +1,35 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import plansData, { type Plan } from '@/assets/data.ts';
 
-type CartItem = {
-  planId: number;
-  quantity: number;
-};
+import plansData from '@/assets/plansData.ts';
+
+import type {
+  BillingPeriod,
+  Plan,
+  CartItem,
+} from '@/assets/domain/type.ts';
+
+import { buildCartDetailed } from '@/assets/domain/pricing.ts';
 
 export const usePlansStore = defineStore('plans', () => {
+  // --------------------
   // State
-  // Catalog of plans
+  // --------------------
   const plans = ref<Plan[]>(plansData);
-
-  // Shopping Cart State
   const cart = ref<CartItem[]>([]);
 
+  // --------------------
   // Helpers
+  // --------------------
   const getPlanById = (id: Plan['id']) =>
     plans.value.find((plan) => plan.id === id);
 
-  // Discount rules
-  function calculateDiscountPercentage(
-    quantity: number,
-  ): number {
-    if (quantity >= 5) return 35;
-    if (quantity >= 3) return 20;
-    if (quantity >= 2) return 10;
-    return 0;
-  }
-
-  // Computed (getters)
-  // Shopping Cart Details (joined with plans data)
-  const cartDetailed = computed(() => {
-    return cart.value
-      .map((item) => {
-        const plan = getPlanById(item.planId);
-
-        if (!plan) return null;
-
-        const discountPercent = calculateDiscountPercentage(
-          item.quantity,
-        );
-        const lineSubtotal = plan.price * item.quantity;
-        const lineDiscount =
-          lineSubtotal * (discountPercent / 100);
-        const lineTotal = lineSubtotal - lineDiscount;
-
-        return {
-          ...item,
-          plan,
-          lineSubtotal,
-          discountPercent,
-          lineDiscount,
-          lineTotal,
-        };
-      })
-      .filter(Boolean) as Array<
-      CartItem & {
-        plan: Plan;
-        lineSubtotal: number;
-        discountPercent: number;
-        lineDiscount: number;
-        lineTotal: number;
-      }
-    >;
-  });
+  // --------------------
+  // Getters / Computeds
+  // --------------------
+  const cartDetailed = computed(() =>
+    buildCartDetailed(cart.value, plans.value),
+  );
 
   const totalQuantity = computed(() =>
     cart.value.reduce((sum, i) => sum + i.quantity, 0),
@@ -91,25 +56,32 @@ export const usePlansStore = defineStore('plans', () => {
     ),
   );
 
+  // --------------------
   // Actions
-  function addToCart(planId: Plan['id'], quantity = 1) {
+  // --------------------
+  function addToCart(
+    planId: Plan['id'],
+    period: BillingPeriod,
+    quantity = 1,
+  ) {
     const existing = cart.value.find(
-      (i) => i.planId === planId,
+      (i) => i.planId === planId && i.period === period,
     );
 
     if (existing) {
       existing.quantity += quantity;
     } else {
-      cart.value.push({ planId, quantity });
+      cart.value.push({ planId, period, quantity });
     }
   }
 
   function decrementFromCart(
     planId: Plan['id'],
+    period: BillingPeriod,
     quantity = 1,
   ) {
     const existing = cart.value.find(
-      (i) => i.planId === planId,
+      (i) => i.planId === planId && i.period === period,
     );
 
     if (!existing) return;
@@ -118,14 +90,18 @@ export const usePlansStore = defineStore('plans', () => {
 
     if (existing.quantity <= 0) {
       cart.value = cart.value.filter(
-        (i) => i.planId !== planId,
+        (i) =>
+          !(i.planId === planId && i.period === period),
       );
     }
   }
 
-  function removeFromCart(planId: Plan['id']) {
+  function removeFromCart(
+    planId: Plan['id'],
+    period: BillingPeriod,
+  ) {
     cart.value = cart.value.filter(
-      (i) => i.planId !== planId,
+      (i) => !(i.planId === planId && i.period === period),
     );
   }
 
@@ -135,10 +111,11 @@ export const usePlansStore = defineStore('plans', () => {
 
   return {
     // State
-    plans, // catalog of plans
-    cart, // cart state
-    cartDetailed,
+    plans,
+    cart,
 
+    // Getters
+    cartDetailed,
     totalQuantity,
     subtotal,
     discountAmount,
@@ -149,5 +126,6 @@ export const usePlansStore = defineStore('plans', () => {
     decrementFromCart,
     removeFromCart,
     clearCart,
+    getPlanById, // optional export, handy in UI
   };
 });

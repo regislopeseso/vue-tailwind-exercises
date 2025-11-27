@@ -1,14 +1,14 @@
 // This is the /src/router/index.ts file.
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import PricingView from '../views/PricingView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/home',
-      name: 'home',
-      component: HomeView,
+      path: '/pricing',
+      name: 'pricing',
+      component: PricingView,
     },
     {
       path: '/checkout',
@@ -26,6 +26,6 @@ const router = createRouter({
       component: () => import('../views/NotFoundView.vue'),
     },
   ],
-})
+});
 
-export default router
+export default router;
