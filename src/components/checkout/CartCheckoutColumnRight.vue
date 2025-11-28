@@ -9,7 +9,7 @@ import CartCheckoutSteps from './CartCheckoutSteps.vue';
 
 <template>
   <div
-    class="flex flex-col justify-center h-full col-span-7 p-16 bg-gray-800 dark:bg-gray-600"
+    class="flex flex-col justify-center min-h-150 h-full col-span-7 p-16 bg-gray-800 dark:bg-gray-600"
   >
     <!-- Header -->
     <header

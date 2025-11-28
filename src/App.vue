@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import AppNavbar from './components/AppNavbar.vue';
+import AppNavbar from './components/navbar/AppNavbar.vue';
 
 const route = useRoute();
 const showNavbar = computed(() => !route.meta.hideNavbar);

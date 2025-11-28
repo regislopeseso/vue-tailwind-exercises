@@ -7,7 +7,7 @@ import CartCheckoutShadow from './CartCheckoutShadow.vue';
 <template>
   <div class="relative">
     <div
-      class="rounded-xl overflow-hidden border-gray-600 border-3 grid grid-cols-12 relative z-10"
+      class="min-h-50! rounded-xl overflow-hidden border-gray-600 border-3 grid grid-cols-12 relative z-10"
     >
       <CartCheckoutColumnLeft />
       <CartCheckoutColumnRight />

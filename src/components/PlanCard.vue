@@ -107,7 +107,7 @@ function handlePlanSelection() {
 
     <button
       type="button"
-      class="font-semibold hover:font-bold py-4 text-xl border-3 rounded-2xl w-[80%] mx-auto hover:cursor-pointer border-gray-600 hover:border-green-500 text-white bg-blue-400 hover:bg-blue-500"
+      class="font-semibold hover:font-bold py-4 text-xl border-3 rounded-2xl w-[80%] mx-auto hover:cursor-pointer border-gray-600 text-white bg-blue-400 hover:bg-blue-500"
       @click="handlePlanSelection"
     >
       Add to Cart
