@@ -7,7 +7,7 @@ const router = useRouter();
 
 function handleCancelCheckout() {
   store.clearCart();
-  router.push('/pricing');
+  router.push('/');
 }
 </script>
 
